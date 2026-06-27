@@ -1,10 +1,12 @@
 namespace RePKG.Application
 {
-    internal static class Constants
+    public static class RuntimeSafetySettings
     {
-        public const int MaximumFrameCount = 100_000;
-        public const int MaximumImageCount = 100;
-        public const int MaximumMipmapCount = 32;
-        public const int MaximumMipmapByteCount = 250_000_000; // 250 MB
+        public static int MaximumFrameCount { get; set; } = 100_000;
+        public static int MaximumImageCount { get; set; } = 100;
+        public static int MaximumMipmapCount { get; set; } = 32;
+
+        // Video textures can legitimately be very large.
+        public static int MaximumMipmapByteCount { get; set; } = 1_000_000_000;
     }
 }

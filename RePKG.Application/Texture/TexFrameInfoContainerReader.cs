@@ -18,8 +18,8 @@ namespace RePKG.Application.Texture
 
             var frameCount = reader.ReadInt32();
 
-            if (frameCount > Constants.MaximumFrameCount)
-                throw new UnsafeTexException($"Frame count exceeds limit: {frameCount}/{Constants.MaximumFrameCount}");
+            if (frameCount > RuntimeSafetySettings.MaximumFrameCount)
+                throw new UnsafeTexException($"Frame count exceeds limit: {frameCount}/{RuntimeSafetySettings.MaximumFrameCount}");
 
             switch (container.Magic)
             {

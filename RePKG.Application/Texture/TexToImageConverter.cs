@@ -21,22 +21,8 @@ namespace RePKG.Application.Texture
             
             var sourceMipmap = tex.FirstImage.FirstMipmap;
 
-            if (tex.IsVideoTexture)
+            if (IsMp4Texture(tex, sourceMipmap.Bytes))
             {
-                if (sourceMipmap.Bytes.Length < 12)
-                {
-                    throw new InvalidOperationException("Expected mp4 magic header");
-                }
-
-                var mp4magic = Encoding.ASCII.GetString(sourceMipmap.Bytes, 4, 8);
-
-                if (!mp4magic.Equals("ftypisom", StringComparison.OrdinalIgnoreCase)
-                    && !mp4magic.Equals("ftypmsnv", StringComparison.OrdinalIgnoreCase)
-                    && !mp4magic.Equals("ftypmp42", StringComparison.OrdinalIgnoreCase))
-                {
-                    throw new InvalidOperationException("Expected mp4 magic header");
-                }
-                
                 return new ImageResult
                 {
                     Bytes = sourceMipmap.Bytes,
@@ -80,17 +66,41 @@ namespace RePKG.Application.Texture
         {
             if (tex == null) throw new ArgumentNullException(nameof(tex));
 
-            if (tex.IsVideoTexture)
+            var sourceMipmap = tex.FirstImage.FirstMipmap;
+            if (IsMp4Texture(tex, sourceMipmap.Bytes))
             {
                 return MipmapFormat.VideoMp4;
             }
 
-            var format = tex.FirstImage.FirstMipmap.Format;
+            var format = sourceMipmap.Format;
 
             if (format.IsCompressed())
                 throw new InvalidOperationException("Raw mipmap format must be uncompressed");
 
             return format.IsRawFormat() ? MipmapFormat.ImagePNG : format;
+        }
+
+        private static bool IsMp4Texture(ITex tex, byte[] bytes)
+        {
+            if (tex != null && tex.IsVideoTexture)
+            {
+                return true;
+            }
+
+            return HasKnownMp4Header(bytes);
+        }
+
+        private static bool HasKnownMp4Header(byte[] bytes)
+        {
+            if (bytes == null || bytes.Length < 12)
+            {
+                return false;
+            }
+
+            var mp4magic = Encoding.ASCII.GetString(bytes, 4, 8);
+            return mp4magic.Equals("ftypisom", StringComparison.OrdinalIgnoreCase)
+                   || mp4magic.Equals("ftypmsnv", StringComparison.OrdinalIgnoreCase)
+                   || mp4magic.Equals("ftypmp42", StringComparison.OrdinalIgnoreCase);
         }
 
         private static ImageResult ConvertToGif(ITex tex)

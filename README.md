@@ -1,70 +1,101 @@
 # RePKG
 
-用 C# 编写的 Wallpaper Engine PKG 解包器 / TEX 转换器。
+[中文](README.zh-CN.md) | **English**
 
-PKG 和 TEX 格式由我进行逆向工程实现。
+RePKG is a Wallpaper Engine PKG unpacker and TEX converter written in C#.
 
-欢迎反馈错误。
+This fork keeps the original CLI workflow and adds a modern WPF GUI for day-to-day extraction and preview work.
 
-# Features
+## Highlights
 
-* 提取 PKG 文件
-* 将 PKG 转换为 Wallpaper Engine 项目
-* 将 TEX 转换为图片
-* 导出 PKG/TEX 信息
+- Extract PKG files
+- Convert TEX files to images
+- Detect and export large video textures more reliably
+- Preview extracted images and videos inside the GUI
+- Switch the GUI between Chinese and English
+- Ship a single-file GUI executable for easier distribution
 
-### Commands
+## Binaries
 
-* help - 显示这些命令，使用 `help "extract"` 和 `help "info"` 查看对应选项
-* extract - 提取指定的 PKG/TEX 文件，或文件夹中的文件
+- CLI: `RePKG.exe`
+- GUI: `RePKG.GUI.exe`
 
+The GUI build is a single executable and is intended for regular desktop use on Windows.
+
+## GUI Features
+
+- Drag and drop `pkg`, `tex`, or folders
+- Default output folder is `output` under the input location
+- Quoted paths are supported
+- Adjustable single-mipmap safety limit
+- Image and video preview pane
+- Video controls: play, pause, stop, seek, volume
+- Chinese / English UI switch
+
+## CLI Commands
+
+### `help`
+
+Shows available commands. Use `help "extract"` and `help "info"` for details.
+
+### `extract`
+
+Extracts a PKG/TEX file, or extracts files from a folder.
+
+```text
+-o, --output          (Default: ./output) Output directory
+-i, --ignoreexts      Don't extract files with specified extensions (comma separated)
+-e, --onlyexts        Only extract files with specified extensions (comma separated)
+-d, --debuginfo       Print debug info while extracting/decompiling
+-t, --tex             Convert all TEX files into images from the input directory
+-s, --singledir       Put all extracted files into one directory
+-r, --recursive       Search subfolders recursively
+-c, --copyproject     Copy project.json and preview.jpg beside PKG into output
+-n, --usename         Use project title from project.json instead of id
+--no-tex-convert      Skip TEX conversion while extracting PKG
+--overwrite           Overwrite existing files
 ```
--o, --output          (默认: ./output) 输出目录
--i, --ignoreexts      不提取指定扩展名的文件（用英文逗号 "," 分隔）
--e, --onlyexts        只提取指定扩展名的文件（用英文逗号 "," 分隔）
--d, --debuginfo       在提取/解压时打印调试信息
--t, --tex             将指定输入目录中的所有 TEX 文件转换为图片
--s, --singledir       是否将所有解压文件放入同一目录，而不是按原路径结构保存
--r, --recursive       递归搜索指定目录下的所有子文件夹
--c, --copyproject     将 PKG 旁边的 project.json 和 preview.jpg 复制到输出目录
--n, --usename         使用 project.json 中的名称作为项目子文件夹名称，而不是 id
---no-tex-convert      提取 PKG 时不将 TEX 文件转换为图片
---overwrite           覆盖所有已存在文件
+
+### `info`
+
+Dumps PKG/TEX information.
+
+```text
+-s, --sort            Sort entries a-z
+-b, --sortby          (Default: name) Sort by name, extension, or size
+-t, --tex             Dump info for all TEX files from the input directory
+-p, --projectinfo     Keys to dump from project.json (comma separated, `*` for all)
+-e, --printentries    Print package entries
+--title-filter        Filter by title
 ```
 
-* info - 导出 PKG/TEX 信息
+## Examples
 
-```
--s, --sort             按 a-z 排序
--b, --sortby           (默认: name) 排序方式...（可选: name, extension, size）
--t, --tex              导出指定目录中所有 TEX 文件的信息
--p, --projectinfo      要从 project.json 导出的键（用逗号分隔，* 表示全部）
--e, --printentries     打印包内条目
---title-filter         标题过滤器
-```
+Extract a PKG and convert TEX entries into images in a local output folder:
 
-### Examples
-
-简单地提取 PKG，并将 TEX 条目转换为图片到当前目录下创建的 output 文件夹中
-
-```
+```text
 repkg extract E:\Games\steamapps\workshop\content\123\scene.pkg
 ```
 
-在指定目录的子文件夹中查找 PKG 文件，并在 output 目录中将其转换为 Wallpaper Engine 项目
+Build Wallpaper Engine project output from a folder:
 
-```
+```text
 repkg extract -c E:\Games\steamapps\workshop\content\123
 ```
 
-在指定目录的子文件夹中查找 PKG 文件，并仅将 TEX 条目转换为 png，然后放入 ./output，同时忽略其在 PKG 中的路径：
+Only convert TEX entries to PNG and flatten the output:
 
-```
-repkg extract -e tex -s -o ./output E:\Games\steamapps\workshop\content\123
+```text
+repkg extract -e tex -s -o .\output E:\Games\steamapps\workshop\content\123
 ```
 
-将某个文件夹中的所有 TEX 文件转换为图片
+Convert TEX files from a folder:
 
-```
+```text
 repkg extract -t -s E:\path\to\dir\with\tex\files
 ```
+
+## Notes
+
+- The GUI targets Windows desktop usage.
+- This fork keeps compatibility with the original CLI behavior where possible.

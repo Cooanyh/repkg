@@ -29,9 +29,9 @@ namespace RePKG.Application.Texture
 
             var mipmapCount = reader.ReadInt32();
             
-            if (mipmapCount > Constants.MaximumMipmapCount)
+            if (mipmapCount > RuntimeSafetySettings.MaximumMipmapCount)
                 throw new UnsafeTexException(
-                    $"Mipmap count exceeds limit: {mipmapCount}/{Constants.MaximumMipmapCount}");
+                    $"Mipmap count exceeds limit: {mipmapCount}/{RuntimeSafetySettings.MaximumMipmapCount}");
             
             var readFunction = PickMipmapReader(container.ImageContainerVersion);
             var format = TexMipmapFormatGetter.GetFormatForTex(container.ImageFormat, texFormat);
@@ -111,9 +111,9 @@ namespace RePKG.Application.Texture
             if (reader.BaseStream.Position + byteCount > reader.BaseStream.Length)
                 throw new UnsafeTexException("Detected invalid mipmap byte count - exceeds stream length");
 
-            if (byteCount > Constants.MaximumMipmapByteCount)
+            if (byteCount > RuntimeSafetySettings.MaximumMipmapByteCount)
                 throw new UnsafeTexException(
-                    $"Mipmap byte count exceeds maximum size: {byteCount}/{Constants.MaximumMipmapByteCount}");
+                    $"Mipmap byte count exceeds maximum size: {byteCount}/{RuntimeSafetySettings.MaximumMipmapByteCount}");
 
             if (!ReadMipmapBytes)
             {

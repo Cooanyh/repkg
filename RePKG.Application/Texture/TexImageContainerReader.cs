@@ -28,9 +28,9 @@ namespace RePKG.Application.Texture
 
             var imageCount = reader.ReadInt32();
 
-            if (imageCount > Constants.MaximumImageCount)
+            if (imageCount > RuntimeSafetySettings.MaximumImageCount)
                 throw new UnsafeTexException(
-                    $"Image count exceeds limit: {imageCount}/{Constants.MaximumImageCount}");
+                    $"Image count exceeds limit: {imageCount}/{RuntimeSafetySettings.MaximumImageCount}");
 
             switch (container.Magic)
             {

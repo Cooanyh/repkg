@@ -1,0 +1,401 @@
+<Window x:Class="RePKG.Gui.Wpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        x:Name="RootWindow"
+        Title="RePKG"
+        Width="1220"
+        Height="780"
+        MinWidth="980"
+        MinHeight="680"
+        WindowStartupLocation="CenterScreen"
+        AllowDrop="True"
+        Drop="Window_Drop"
+        DragOver="Window_DragOver">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="12" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Style="{StaticResource CardBorderStyle}" Padding="14,12" Margin="0,0,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="40" Height="40" Background="#F0ECE5" BorderBrush="#E1DBD1" BorderThickness="1" CornerRadius="12">
+                        <Image x:Name="HeroIconImage"
+                               Width="28"
+                               Height="28"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Stretch="Uniform" />
+                    </Border>
+                    <StackPanel Margin="10,0,0,0">
+                        <TextBlock FontSize="17" FontWeight="SemiBold" Text="RePKG" />
+                        <TextBlock x:Name="HeroSubtitleTextBlock"
+                                   Foreground="{StaticResource TextMutedBrush}"
+                                   FontSize="12"
+                                   Text="提取 Wallpaper Engine PKG，并在右侧快速预览素材。" />
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock x:Name="DragHintTextBlock"
+                               Margin="0,0,10,0"
+                               VerticalAlignment="Center"
+                               Foreground="{StaticResource TextMutedBrush}"
+                               FontSize="12"
+                               Text="拖入 pkg / tex / 文件夹" />
+                    <Border Background="#FCFBF8"
+                            BorderBrush="#E4DDD2"
+                            BorderThickness="1"
+                            CornerRadius="10"
+                            Padding="10,6">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock x:Name="LanguageLabelTextBlock"
+                                       Margin="0,0,10,0"
+                                       VerticalAlignment="Center"
+                                       Foreground="{StaticResource TextMutedBrush}"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Text="语言 / Language" />
+                            <ComboBox x:Name="LanguageComboBox"
+                                      Width="86"
+                                      Style="{StaticResource CompactComboBoxStyle}"
+                                      VerticalAlignment="Center"
+                                      SelectionChanged="LanguageComboBox_OnSelectionChanged">
+                                <ComboBoxItem x:Name="ChineseLanguageItem" Style="{StaticResource CompactComboBoxItemStyle}" Content="中文" Tag="zh-CN" />
+                                <ComboBoxItem x:Name="EnglishLanguageItem" Style="{StaticResource CompactComboBoxItemStyle}" Content="English" Tag="en-US" />
+                            </ComboBox>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="380" />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <Border Style="{StaticResource CardBorderStyle}">
+                        <StackPanel>
+                            <TextBlock x:Name="ExtractSectionTitleTextBlock" Style="{StaticResource SectionTitleStyle}" Text="Extract" />
+
+                            <TextBlock x:Name="ExtractInputLabelTextBlock" Style="{StaticResource LabelStyle}" Text="输入文件或目录" />
+                            <TextBox x:Name="ExtractInputTextBox" TextChanged="ExtractInputTextBox_OnTextChanged" />
+                            <WrapPanel>
+                                <Button x:Name="BrowseExtractFileButton" Content="选择文件" Click="BrowseExtractFile_Click" />
+                                <Button x:Name="BrowseExtractFolderButton" Content="选择目录" Click="BrowseExtractFolder_Click" />
+                                <Button x:Name="ClearExtractInputButton" Content="清空" Click="ClearExtractInput_Click" />
+                            </WrapPanel>
+
+                            <TextBlock x:Name="OutputDirectoryLabelTextBlock" Style="{StaticResource LabelStyle}" Text="输出目录" />
+                            <TextBox x:Name="OutputDirectoryTextBox" TextChanged="OutputDirectoryTextBox_OnTextChanged" />
+                            <WrapPanel>
+                                <Button x:Name="BrowseOutputButton" Content="选择输出" Click="BrowseOutput_Click" />
+                                <Button x:Name="OpenOutputButton" Content="打开输出" Click="OpenOutput_Click" />
+                            </WrapPanel>
+
+                            <Grid Margin="0,6,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock x:Name="IgnoreExtsLabelTextBlock" Style="{StaticResource LabelStyle}" Margin="0,0,0,0" Text="忽略扩展名" />
+                                    <TextBox x:Name="IgnoreExtsTextBox" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock x:Name="OnlyExtsLabelTextBlock" Style="{StaticResource LabelStyle}" Margin="0,0,0,0" Text="仅保留扩展名" />
+                                    <TextBox x:Name="OnlyExtsTextBox" />
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock x:Name="MaxMipmapLabelTextBlock" Style="{StaticResource LabelStyle}" Text="单 mipmap 安全上限（MB）" />
+                            <TextBox x:Name="MaxMipmapMbTextBox" Text="1024" />
+                            <TextBlock x:Name="MaxMipmapHintTextBlock"
+                                       Margin="0,6,0,0"
+                                       FontSize="12"
+                                       Foreground="{StaticResource WarningBrush}"
+                                       Text="默认 1024 MB。超大视频纹理可提高，建议按需调整。" />
+
+                            <WrapPanel Margin="0,8,0,0">
+                                <CheckBox x:Name="ExtractTexDirectoryCheckBox" Content="TEX 目录模式" />
+                                <CheckBox x:Name="SingleDirCheckBox" Content="单目录输出" />
+                                <CheckBox x:Name="RecursiveCheckBox" Content="递归子目录" />
+                            </WrapPanel>
+                            <WrapPanel>
+                                <CheckBox x:Name="CopyProjectCheckBox" Content="复制 project 文件" />
+                                <CheckBox x:Name="UseNameCheckBox" Content="使用标题命名" />
+                            </WrapPanel>
+                            <WrapPanel>
+                                <CheckBox x:Name="NoTexConvertCheckBox" Content="不转换 TEX" />
+                                <CheckBox x:Name="OverwriteCheckBox" Content="覆盖现有文件" />
+                            </WrapPanel>
+
+                            <WrapPanel Margin="0,14,0,0">
+                                <Button x:Name="RunExtractButton"
+                                        Width="126"
+                                        Style="{StaticResource PrimaryButtonStyle}"
+                                        Content="开始提取"
+                                        Click="RunExtract_Click" />
+                                <Button x:Name="RefreshPreviewButton" Width="110" Content="刷新预览" Click="RefreshPreview_Click" />
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource CardBorderStyle}">
+                        <StackPanel>
+                            <TextBlock x:Name="InfoSectionTitleTextBlock" Style="{StaticResource SectionTitleStyle}" Text="Info" />
+
+                            <TextBlock x:Name="InfoInputLabelTextBlock" Style="{StaticResource LabelStyle}" Text="输入文件或目录" />
+                            <TextBox x:Name="InfoInputTextBox" />
+                            <WrapPanel>
+                                <Button x:Name="BrowseInfoFileButton" Content="选择文件" Click="BrowseInfoFile_Click" />
+                                <Button x:Name="BrowseInfoFolderButton" Content="选择目录" Click="BrowseInfoFolder_Click" />
+                            </WrapPanel>
+
+                            <Grid Margin="0,6,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock x:Name="InfoSortLabelTextBlock" Style="{StaticResource LabelStyle}" Margin="0,0,0,0" Text="排序方式" />
+                                    <ComboBox x:Name="InfoSortByComboBox" SelectedIndex="0">
+                                        <ComboBoxItem x:Name="InfoSortNameItem" Content="name" Tag="name" />
+                                        <ComboBoxItem x:Name="InfoSortExtensionItem" Content="extension" Tag="extension" />
+                                        <ComboBoxItem x:Name="InfoSortSizeItem" Content="size" Tag="size" />
+                                    </ComboBox>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock x:Name="ProjectInfoLabelTextBlock" Style="{StaticResource LabelStyle}" Margin="0,0,0,0" Text="project.json 字段" />
+                                    <TextBox x:Name="ProjectInfoTextBox" />
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock x:Name="TitleFilterLabelTextBlock" Style="{StaticResource LabelStyle}" Text="标题过滤" />
+                            <TextBox x:Name="TitleFilterTextBox" />
+
+                            <WrapPanel Margin="0,8,0,0">
+                                <CheckBox x:Name="InfoSortCheckBox" Content="排序" />
+                                <CheckBox x:Name="InfoTexDirectoryCheckBox" Content="TEX 目录模式" />
+                                <CheckBox x:Name="PrintEntriesCheckBox" Content="打印条目" />
+                            </WrapPanel>
+
+                            <Button x:Name="RunInfoButton"
+                                    Width="110"
+                                    Margin="0,14,0,0"
+                                    Content="运行 Info"
+                                    Click="RunInfo_Click" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="12" />
+                    <RowDefinition Height="290" />
+                    <RowDefinition Height="12" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0" Style="{StaticResource CardBorderStyle}" Padding="16,14" Margin="0,0,0,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="300" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock x:Name="PreviewSectionTitleTextBlock" Style="{StaticResource SectionTitleStyle}" Text="Preview" />
+                            <TextBlock x:Name="StatusTextBlock"
+                                       Margin="0,6,0,0"
+                                       FontSize="12"
+                                       Foreground="{StaticResource TextMutedBrush}"
+                                       Text="空闲。运行提取后，这里会自动刷新图片和视频预览。" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                            <TextBlock x:Name="SelectedPreviewLabelTextBlock" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Text="当前选择" />
+                            <TextBlock x:Name="SelectedPreviewTextBlock"
+                                       Margin="0,4,0,0"
+                                       FontSize="12.5"
+                                       TextAlignment="Right"
+                                       TextTrimming="CharacterEllipsis"
+                                       ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="2" Style="{StaticResource CardBorderStyle}" Margin="0,0,0,0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <Border Background="{StaticResource PanelSoftBrush}" BorderBrush="{StaticResource BorderBrushApp}" BorderThickness="1" CornerRadius="10">
+                            <Grid Margin="10">
+                                <Image x:Name="PreviewImage" Stretch="Uniform" Visibility="Collapsed" />
+                                <MediaElement x:Name="PreviewMedia"
+                                              LoadedBehavior="Manual"
+                                              UnloadedBehavior="Manual"
+                                              Stretch="Uniform"
+                                              Visibility="Collapsed"
+                                              MediaOpened="PreviewMedia_OnMediaOpened"
+                                              MediaEnded="PreviewMedia_OnMediaEnded" />
+                                <Border x:Name="PreviewPlaceholder" Background="#F7F4EF" CornerRadius="8">
+                                    <TextBlock x:Name="PreviewPlaceholderTextBlock"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Foreground="{StaticResource TextMutedBrush}"
+                                               FontSize="14"
+                                               Text="提取完成后，这里会显示图片或视频预览。" />
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <Grid x:Name="MediaControlsPanel"
+                              Grid.Row="1"
+                              Margin="0,14,0,0"
+                              Visibility="Collapsed">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="20" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="18" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="120" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0"
+                                        Orientation="Horizontal"
+                                        VerticalAlignment="Center">
+                                <Button x:Name="PlayPauseButton"
+                                        Width="88"
+                                        Margin="0"
+                                        VerticalAlignment="Center"
+                                        Content="播放"
+                                        Click="ToggleMediaPlayback_Click" />
+                                <Button x:Name="StopMediaButton"
+                                        Width="72"
+                                        Margin="10,0,0,0"
+                                        VerticalAlignment="Center"
+                                        Content="停止"
+                                        Click="StopMediaPlayback_Click" />
+                            </StackPanel>
+
+                            <TextBlock x:Name="CurrentTimeTextBlock"
+                                       Grid.Column="2"
+                                       VerticalAlignment="Center"
+                                       FontSize="12"
+                                       Foreground="{StaticResource TextMutedBrush}"
+                                       Text="00:00" />
+
+                            <Slider x:Name="MediaPositionSlider"
+                                    Grid.Column="3"
+                                    Margin="12,0"
+                                    VerticalAlignment="Center"
+                                    Minimum="0"
+                                    Maximum="1"
+                                    ValueChanged="MediaPositionSlider_OnValueChanged"
+                                    PreviewMouseLeftButtonDown="MediaPositionSlider_OnPreviewMouseLeftButtonDown"
+                                    PreviewMouseLeftButtonUp="MediaPositionSlider_OnPreviewMouseLeftButtonUp" />
+
+                            <TextBlock x:Name="TotalTimeTextBlock"
+                                       Grid.Column="4"
+                                       VerticalAlignment="Center"
+                                       FontSize="12"
+                                       Foreground="{StaticResource TextMutedBrush}"
+                                       Text="00:00" />
+
+                            <TextBlock Grid.Column="6"
+                                       x:Name="VolumeLabelTextBlock"
+                                       VerticalAlignment="Center"
+                                       FontSize="12"
+                                       Foreground="{StaticResource TextMutedBrush}"
+                                       Text="音量" />
+
+                            <Slider x:Name="VolumeSlider"
+                                    Grid.Column="7"
+                                    Margin="10,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Minimum="0"
+                                    Maximum="1"
+                                    TickFrequency="0.05"
+                                    Value="0.65"
+                                    ValueChanged="VolumeSlider_OnValueChanged" />
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <Grid Grid.Row="4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.1*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{StaticResource CardBorderStyle}" Margin="0,0,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <TextBlock x:Name="PreviewFilesTitleTextBlock" Style="{StaticResource SectionTitleStyle}" Text="Preview Files" />
+                            <ListBox x:Name="PreviewFilesListBox"
+                                     Grid.Row="1"
+                                     Margin="0,12,0,0"
+                                     SelectionChanged="PreviewFilesListBox_OnSelectionChanged"
+                                     DisplayMemberPath="DisplayName" />
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Column="2" Style="{StaticResource CardBorderStyle}" Margin="0,0,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <DockPanel>
+                                <TextBlock x:Name="LogTitleTextBlock" Style="{StaticResource SectionTitleStyle}" Text="Log" />
+                                <Button DockPanel.Dock="Right"
+                                        x:Name="ClearLogButton"
+                                        Margin="10,0,0,0"
+                                        Padding="12,6"
+                                        Content="清空"
+                                        Click="ClearLog_Click" />
+                            </DockPanel>
+                            <TextBox x:Name="LogTextBox"
+                                     Grid.Row="1"
+                                     Margin="0,12,0,0"
+                                     AcceptsReturn="True"
+                                     Background="{StaticResource PanelSoftBrush}"
+                                     HorizontalScrollBarVisibility="Auto"
+                                     IsReadOnly="True"
+                                     TextWrapping="NoWrap"
+                                     VerticalScrollBarVisibility="Auto" />
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
