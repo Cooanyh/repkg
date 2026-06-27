@@ -91,7 +91,6 @@ namespace RePKG.Gui.Wpf
             }
             catch
             {
-                // Ignore icon-load issues so the window can still open normally.
             }
         }
 
@@ -995,8 +994,6 @@ namespace RePKG.Gui.Wpf
         {
             var data = new DataObject();
             data.SetData(DataFormats.FileDrop, new[] { item.Path }, false);
-
-            // Mark as copy so Explorer and other shell targets treat this as a file copy operation.
             data.SetData("Preferred DropEffect", new MemoryStream(new byte[] { 5, 0, 0, 0 }), false);
 
             for (var attempt = 0; attempt < 5; attempt++)
