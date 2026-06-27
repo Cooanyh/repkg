@@ -104,6 +104,7 @@
                                                       Margin="10,0,0,0"
                                                       VerticalAlignment="Center"
                                                       HorizontalAlignment="Left"
+                                                      IsHitTestVisible="False"
                                                       RecognizesAccessKey="True"
                                                       Content="{TemplateBinding SelectionBoxItem}"
                                                       ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
@@ -114,9 +115,23 @@
                                                HorizontalAlignment="Center"
                                                FontSize="10"
                                                Foreground="{StaticResource TextMutedBrush}"
+                                               IsHitTestVisible="False"
                                                Text="v" />
                                 </Grid>
                             </Border>
+
+                            <ToggleButton Grid.ColumnSpan="2"
+                                          Background="Transparent"
+                                          BorderThickness="0"
+                                          Focusable="False"
+                                          ClickMode="Press"
+                                          IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border Background="Transparent" />
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
 
                             <Popup x:Name="PART_Popup"
                                    Placement="Bottom"
@@ -198,6 +213,15 @@
             <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
             <Setter Property="Background" Value="#DDD5C9" />
             <Setter Property="BorderBrush" Value="#CBBFAD" />
+        </Style>
+
+        <Style x:Key="InlineActionButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Height" Value="30" />
+            <Setter Property="MinHeight" Value="30" />
+            <Setter Property="Padding" Value="8,4" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
         </Style>
 
         <Style TargetType="ListBox">

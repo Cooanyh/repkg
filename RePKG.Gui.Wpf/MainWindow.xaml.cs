@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -259,6 +260,7 @@ namespace RePKG.Gui.Wpf
             else
             {
                 SelectedPreviewTextBlock.Text = T("preview.noFiles");
+                UpdatePreviewActionButtons();
             }
         }
 
@@ -534,12 +536,135 @@ namespace RePKG.Gui.Wpf
 
         private void PreviewFilesListBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            PreviewFilesListBox.Focus();
             ShowPreview(PreviewFilesListBox.SelectedItem as PreviewFileItem);
+            UpdatePreviewActionButtons();
+        }
+
+        private void PreviewFilesListBox_OnPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (!PreviewFilesListBox.IsKeyboardFocusWithin)
+            {
+                Keyboard.Focus(PreviewFilesListBox);
+            }
         }
 
         private void ClearLog_Click(object sender, RoutedEventArgs e)
         {
             LogTextBox.Clear();
+        }
+
+        private void CopyPreviewFile_Click(object sender, RoutedEventArgs e)
+        {
+            var item = ResolvePreviewFileItem(sender, notifyIfMissing: true);
+            if (item == null)
+            {
+                return;
+            }
+
+            CopyPreviewFileToClipboard(item);
+            SetStatus("status.copiedFile", item.DisplayName);
+        }
+
+        private void OpenPreviewFile_Click(object sender, RoutedEventArgs e)
+        {
+            var item = ResolvePreviewFileItem(sender, notifyIfMissing: true);
+            if (item == null)
+            {
+                return;
+            }
+
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = item.Path,
+                UseShellExecute = true
+            });
+        }
+
+        private void SavePreviewFile_Click(object sender, RoutedEventArgs e)
+        {
+            var item = ResolvePreviewFileItem(sender, notifyIfMissing: true);
+            if (item == null)
+            {
+                return;
+            }
+
+            var dialog = new Microsoft.Win32.SaveFileDialog
+            {
+                FileName = item.DisplayName,
+                OverwritePrompt = true
+            };
+
+            if (dialog.ShowDialog(this) == true)
+            {
+                File.Copy(item.Path, dialog.FileName, true);
+            }
+        }
+
+        private void DeletePreviewFile_Click(object sender, RoutedEventArgs e)
+        {
+            var item = ResolvePreviewFileItem(sender, notifyIfMissing: true);
+            if (item == null)
+            {
+                return;
+            }
+
+            var result = MessageBox.Show(
+                this,
+                T("dialog.confirmDeleteFile", item.Path),
+                T("dialog.confirmDeleteFileTitle"),
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (result != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            DeletePreviewFile(item);
+        }
+
+        private void PreviewFilesListBox_OnPreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.C && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                var item = GetSelectedPreviewFileOrNotify();
+                if (item != null)
+                {
+                    CopyPreviewFileToClipboard(item);
+                    SetStatus("status.copiedFile", item.DisplayName);
+                }
+
+                e.Handled = true;
+            }
+        }
+
+        private void DeleteExtracted_Click(object sender, RoutedEventArgs e)
+        {
+            var output = NormalizePathInput(OutputDirectoryTextBox.Text);
+            if (!Directory.Exists(output))
+            {
+                MessageBox.Show(this, T("dialog.outputMissing"), T("dialog.outputMissingTitle"), MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var result = MessageBox.Show(
+                this,
+                T("dialog.confirmDeleteExtracted", output),
+                T("dialog.confirmDeleteExtractedTitle"),
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (result != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            Directory.Delete(output, true);
+            ResetPreviewState();
+            PreviewFilesListBox.ItemsSource = null;
+            LogTextBox.Clear();
+            SetStatus("status.deletedExtracted");
         }
 
         private void LanguageComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -720,6 +845,7 @@ namespace RePKG.Gui.Wpf
             PreviewPlaceholder.Visibility = Visibility.Visible;
             PreviewPlaceholderTextBlock.Text = T("preview.placeholder");
             SelectedPreviewTextBlock.Text = T("preview.noFiles");
+            UpdatePreviewActionButtons();
             SetStatus("status.idle");
         }
 
@@ -776,6 +902,7 @@ namespace RePKG.Gui.Wpf
             OverwriteCheckBox.Content = T("checkbox.overwrite");
             RunExtractButton.Content = T("button.runExtract");
             RefreshPreviewButton.Content = T("button.refreshPreview");
+            DeleteExtractedButton.Content = T("button.deleteExtracted");
 
             InfoSectionTitleTextBlock.Text = T("section.info");
             InfoInputLabelTextBlock.Text = T("label.inputPath");
@@ -797,6 +924,9 @@ namespace RePKG.Gui.Wpf
             PreviewFilesTitleTextBlock.Text = T("section.previewFiles");
             LogTitleTextBlock.Text = T("section.log");
             ClearLogButton.Content = T("button.clearLog");
+            PreviewOpenButton.Content = T("button.openFile");
+            PreviewSaveButton.Content = T("button.saveFile");
+            PreviewDeleteButton.Content = T("button.deleteFile");
             VolumeLabelTextBlock.Text = T("label.volume");
             PreviewPlaceholderTextBlock.Text = T("preview.placeholder");
 
@@ -809,6 +939,14 @@ namespace RePKG.Gui.Wpf
             }
         }
 
+        private void UpdatePreviewActionButtons()
+        {
+            var hasPreviewFile = PreviewFilesListBox?.SelectedItem is PreviewFileItem item && File.Exists(item.Path);
+            PreviewOpenButton.IsEnabled = hasPreviewFile;
+            PreviewSaveButton.IsEnabled = hasPreviewFile;
+            PreviewDeleteButton.IsEnabled = hasPreviewFile;
+        }
+
         private TimeSpan GetNaturalDuration()
         {
             return PreviewMedia.NaturalDuration.HasTimeSpan ? PreviewMedia.NaturalDuration.TimeSpan : TimeSpan.Zero;
@@ -819,6 +957,64 @@ namespace RePKG.Gui.Wpf
             return value.TotalHours >= 1
                 ? value.ToString(@"hh\:mm\:ss")
                 : value.ToString(@"mm\:ss");
+        }
+
+        private PreviewFileItem GetSelectedPreviewFileOrNotify()
+        {
+            var item = PreviewFilesListBox.SelectedItem as PreviewFileItem;
+            if (item != null && File.Exists(item.Path))
+            {
+                return item;
+            }
+
+            MessageBox.Show(this, T("dialog.noPreviewFile"), T("dialog.noPreviewFileTitle"), MessageBoxButton.OK, MessageBoxImage.Information);
+            return null;
+        }
+
+        private PreviewFileItem ResolvePreviewFileItem(object sender, bool notifyIfMissing)
+        {
+            var element = sender as FrameworkElement;
+            var taggedItem = element?.Tag as PreviewFileItem;
+            if (taggedItem != null && File.Exists(taggedItem.Path))
+            {
+                PreviewFilesListBox.SelectedItem = taggedItem;
+                return taggedItem;
+            }
+
+            return notifyIfMissing ? GetSelectedPreviewFileOrNotify() : null;
+        }
+
+        private void DeletePreviewFile(PreviewFileItem item)
+        {
+            File.Delete(item.Path);
+            SetStatus("status.deletedFile", item.DisplayName);
+            RefreshPreviewFiles();
+        }
+
+        private static void CopyPreviewFileToClipboard(PreviewFileItem item)
+        {
+            var data = new DataObject();
+            data.SetData(DataFormats.FileDrop, new[] { item.Path }, false);
+
+            // Mark as copy so Explorer and other shell targets treat this as a file copy operation.
+            data.SetData("Preferred DropEffect", new MemoryStream(new byte[] { 5, 0, 0, 0 }), false);
+
+            for (var attempt = 0; attempt < 5; attempt++)
+            {
+                try
+                {
+                    Clipboard.Clear();
+                    Clipboard.SetDataObject(data, true);
+                    return;
+                }
+                catch when (attempt < 4)
+                {
+                    Thread.Sleep(40);
+                }
+            }
+
+            Clipboard.Clear();
+            Clipboard.SetDataObject(data, true);
         }
     }
 }

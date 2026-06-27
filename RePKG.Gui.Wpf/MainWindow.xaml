@@ -146,14 +146,37 @@
                                 <CheckBox x:Name="OverwriteCheckBox" Content="覆盖现有文件" />
                             </WrapPanel>
 
-                            <WrapPanel Margin="0,14,0,0">
+                            <Grid Margin="0,14,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="8" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="8" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
                                 <Button x:Name="RunExtractButton"
-                                        Width="126"
+                                        Grid.Column="0"
+                                        Margin="0"
+                                        Padding="10,7"
+                                        FontSize="12.5"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Content="开始提取"
                                         Click="RunExtract_Click" />
-                                <Button x:Name="RefreshPreviewButton" Width="110" Content="刷新预览" Click="RefreshPreview_Click" />
-                            </WrapPanel>
+                                <Button x:Name="RefreshPreviewButton"
+                                        Grid.Column="2"
+                                        Margin="0"
+                                        Padding="10,7"
+                                        FontSize="12.5"
+                                        Content="刷新预览"
+                                        Click="RefreshPreview_Click" />
+                                <Button x:Name="DeleteExtractedButton"
+                                        Grid.Column="4"
+                                        Margin="0"
+                                        Padding="10,7"
+                                        FontSize="12.5"
+                                        Content="删除提取"
+                                        Click="DeleteExtracted_Click" />
+                            </Grid>
                         </StackPanel>
                     </Border>
 
@@ -267,6 +290,34 @@
                                                FontSize="14"
                                                Text="提取完成后，这里会显示图片或视频预览。" />
                                 </Border>
+                                <Border HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        Margin="0,0,10,0"
+                                        Padding="8"
+                                        Background="#F7F3EC"
+                                        BorderBrush="{StaticResource BorderBrushApp}"
+                                        BorderThickness="1"
+                                        CornerRadius="10">
+                                    <StackPanel Orientation="Vertical">
+                                        <Button x:Name="PreviewOpenButton"
+                                                Width="72"
+                                                Margin="0,0,0,8"
+                                                Style="{StaticResource InlineActionButtonStyle}"
+                                                Content="打开"
+                                                Click="OpenPreviewFile_Click" />
+                                        <Button x:Name="PreviewSaveButton"
+                                                Width="72"
+                                                Margin="0,0,0,8"
+                                                Style="{StaticResource InlineActionButtonStyle}"
+                                                Content="另存"
+                                                Click="SavePreviewFile_Click" />
+                                        <Button x:Name="PreviewDeleteButton"
+                                                Width="72"
+                                                Style="{StaticResource InlineActionButtonStyle}"
+                                                Content="删除"
+                                                Click="DeletePreviewFile_Click" />
+                                    </StackPanel>
+                                </Border>
                             </Grid>
                         </Border>
 
@@ -363,8 +414,19 @@
                             <ListBox x:Name="PreviewFilesListBox"
                                      Grid.Row="1"
                                      Margin="0,12,0,0"
+                                     PreviewKeyDown="PreviewFilesListBox_OnPreviewKeyDown"
+                                     PreviewMouseLeftButtonDown="PreviewFilesListBox_OnPreviewMouseLeftButtonDown"
                                      SelectionChanged="PreviewFilesListBox_OnSelectionChanged"
-                                     DisplayMemberPath="DisplayName" />
+                                     HorizontalContentAlignment="Stretch">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock VerticalAlignment="Center"
+                                                   Text="{Binding DisplayName}"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   ToolTip="{Binding Path}" />
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
                         </Grid>
                     </Border>
 
@@ -374,15 +436,27 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
-                            <DockPanel>
-                                <TextBlock x:Name="LogTitleTextBlock" Style="{StaticResource SectionTitleStyle}" Text="Log" />
-                                <Button DockPanel.Dock="Right"
-                                        x:Name="ClearLogButton"
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Name="LogTitleTextBlock"
+                                           Grid.Column="0"
+                                           Style="{StaticResource SectionTitleStyle}"
+                                           VerticalAlignment="Center"
+                                           Text="Log" />
+                                <Button x:Name="ClearLogButton"
+                                        Grid.Column="1"
+                                        Width="70"
+                                        Height="30"
                                         Margin="10,0,0,0"
-                                        Padding="12,6"
+                                        Padding="0"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
                                         Content="清空"
                                         Click="ClearLog_Click" />
-                            </DockPanel>
+                            </Grid>
                             <TextBox x:Name="LogTextBox"
                                      Grid.Row="1"
                                      Margin="0,12,0,0"
